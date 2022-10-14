@@ -1,5 +1,5 @@
 import type { Handler } from 'aws-lambda';
-import { LambdaOptions } from '../types';
+import type { LambdaOptions } from '../types.js';
 
 class LambdaHandlerError extends Error {
   constructor(message: string, error: Error) {
@@ -10,21 +10,23 @@ class LambdaHandlerError extends Error {
   }
 }
 
-export const getLambdaHandler = (options: LambdaOptions): Handler => {
+export const getLambdaHandler = async (
+  options: LambdaOptions
+): Promise<Handler> => {
   const lambdaHandler = options.lambdaHandler || 'handler';
 
   try {
-    const lambdaFunction = require(options.lambdaPath);
+    const lambdaFunction = await import(options.lambdaPath);
 
     if (!(lambdaHandler in lambdaFunction)) {
       throw new Error(`lambdaHandler ${lambdaHandler} is not exported!`);
     }
 
     return lambdaFunction[lambdaHandler] as Handler;
-  } catch (e) {
+  } catch (error: unknown) {
     throw new LambdaHandlerError(
       `Unable to require lambda handler from ${options.lambdaPath}`,
-      e
+      error instanceof Error ? error : new Error(String(error))
     );
   }
 };

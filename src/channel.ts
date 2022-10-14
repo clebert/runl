@@ -1,6 +1,10 @@
 import type { ChildProcess, Serializable } from 'child_process';
-import { isLambdaError, isLambdaResponse, isWithRequestNumber } from './types';
-import { deserializeError } from './utils/error';
+import {
+  isLambdaError,
+  isLambdaResponse,
+  isWithRequestNumber
+} from './types.js';
+import { deserializeError } from './utils/error.js';
 
 export class Channel<T> {
   private readonly cp: ChildProcess;
@@ -51,13 +55,21 @@ export class Channel<T> {
     }
 
     if (isLambdaError(data)) {
-      if (this.timeout) clearTimeout(this.timeout);
-      if (this.reject) this.reject(deserializeError(data.error));
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      if (this.reject) {
+        this.reject(deserializeError(data.error));
+      }
     }
 
     if (isLambdaResponse<T>(data)) {
-      if (this.timeout) clearTimeout(this.timeout);
-      if (this.resolve) this.resolve(data.result);
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      if (this.resolve) {
+        this.resolve(data.result);
+      }
     }
   };
 }

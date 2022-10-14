@@ -1,12 +1,15 @@
 /* eslint-disable no-console */
 
-import { ChildProcess, fork } from 'child_process';
+import type { ChildProcess } from 'child_process';
+import { fork } from 'child_process';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { findPackageFile } from './utils/find-package-file';
-import { lastModified } from './utils/last-modified';
-import { createExecArgv } from './utils/create-exec-argv';
-import { DeepPartial, LambdaMode, LambdaOptions } from './types';
-import { Channel } from './channel';
+import { Channel } from './channel.js';
+import type { DeepPartial, LambdaOptions } from './types.js';
+import { LambdaMode } from './types.js';
+import { createExecArgv } from './utils/create-exec-argv.js';
+import { lastModified } from './utils/last-modified.js';
 
 export { LambdaMode };
 
@@ -24,7 +27,7 @@ export class Lambda {
   constructor(options: LambdaOptions) {
     this.options = {
       ...options,
-      lambdaPath: require.resolve(options.lambdaPath)
+      lambdaPath: options.lambdaPath
     };
   }
 
@@ -42,7 +45,7 @@ export class Lambda {
     this.cp = this.createFork();
   };
 
-  public execute = <T>(
+  public execute = async <T>(
     event?: DeepPartial<APIGatewayProxyEvent>
   ): Promise<T> => {
     const requestNumber = this.newRequestNumber();
@@ -116,11 +119,10 @@ export class Lambda {
       return this.lambdaWrapperPath;
     }
 
-    const lambdaWrapperPath = findPackageFile('./run-lambda.js');
-
-    if (!lambdaWrapperPath) {
-      throw new Error('Unable to load lambda wrapper');
-    }
+    const lambdaWrapperPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      'run-lambda.js'
+    );
 
     this.lambdaWrapperPath = lambdaWrapperPath;
 

@@ -1,4 +1,5 @@
-exports.go = async () =>
-  new Promise((resolve) => {
-    resolve('here');
-  });
+// @ts-check
+
+export async function go() {
+  return 'here';
+}

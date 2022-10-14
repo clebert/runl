@@ -1,3 +1,5 @@
-exports.handler = async () => {
-  throw new Error("errare humanum est");
+// @ts-check
+
+export async function handler() {
+  throw new Error('errare humanum est');
 }

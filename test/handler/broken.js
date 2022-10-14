@@ -1,1 +1,1 @@
-exports.handler = BROKEN
+// @ts-check

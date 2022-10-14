@@ -1,12 +1,13 @@
-const https = require('https');
+// @ts-check
 
-exports.handler = async () =>
-  new Promise((resolve, reject) => {
+import https from 'https';
+
+export async function handler() {
+  return new Promise((resolve, reject) => {
     https
       .get('https://example.com', (res) => {
         resolve(res.statusCode);
       })
-      .on('error', (e) => {
-        reject(Error(e));
-      });
+      .on('error', reject);
   });
+}

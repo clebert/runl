@@ -1,4 +1,4 @@
-import type { SerializableError } from '../types';
+import type { SerializableError } from '../types.js';
 
 export const serializeError = (error: string | Error): SerializableError => ({
   message: typeof error === 'string' ? error : error.message,

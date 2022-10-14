@@ -1,3 +1,5 @@
-exports.handler =  function(event, context, callback) {
-    callback(new Error("errare humanum est"))
+// @ts-check
+
+export function handler(_event, _context, callback) {
+  callback(new Error('errare humanum est'));
 }

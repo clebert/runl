@@ -1,7 +1,3 @@
 dist
-typings
+types
 node_modules
-
-*.tgz
-
-.eslintcache

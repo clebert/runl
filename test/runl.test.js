@@ -1,11 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const { Lambda } = require('../dist/index');
+// @ts-check
+
+import * as fs from 'fs';
+import * as path from 'path';
+import * as url from 'url';
+import { Lambda } from '../dist/index.js';
 
 const touchFile = (filePath) => {
   const newDate = new Date();
   fs.utimesSync(filePath, newDate, newDate);
 };
+
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 describe('runl', () => {
   let lambda = undefined;
@@ -19,8 +24,8 @@ describe('runl', () => {
 
   it.each(modes)('returns status code 200 for mode: %s', async (mode) => {
     lambda = new Lambda({
-      mode: mode,
-      lambdaPath: __dirname + '/handler/do-request.js'
+      mode,
+      lambdaPath: path.join(dirname, './handler/do-request.js')
     });
 
     const result1 = await lambda.execute();
@@ -33,7 +38,7 @@ describe('runl', () => {
   it('handles exceptions properly', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/fail.js'
+      lambdaPath: path.join(dirname, './handler/fail.js')
     });
 
     await expect(async () => {
@@ -42,7 +47,7 @@ describe('runl', () => {
 
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/fail-callback.js'
+      lambdaPath: path.join(dirname, './handler/fail-callback.js')
     });
 
     await expect(async () => {
@@ -53,7 +58,7 @@ describe('runl', () => {
   it('does not swallow errors while requiring the handler code', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/broken.js'
+      lambdaPath: path.join(dirname, './handler/broken.js')
     });
 
     await expect(async () => {
@@ -64,7 +69,7 @@ describe('runl', () => {
   it('works with non-async handlers', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/callback.js'
+      lambdaPath: path.join(dirname, './handler/callback.js')
     });
 
     const result = await lambda.execute();
@@ -75,7 +80,7 @@ describe('runl', () => {
   it('uses the lambdHandler option correctly', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/non-default.js',
+      lambdaPath: path.join(dirname, './handler/non-default.js'),
       lambdaHandler: 'go'
     });
 
@@ -87,7 +92,7 @@ describe('runl', () => {
   it('passes the environment variables', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/use-env.js',
+      lambdaPath: path.join(dirname, './handler/use-env.js'),
       environment: {
         TEST: 'test'
       }
@@ -101,7 +106,7 @@ describe('runl', () => {
   it('respects the lambda timeout', async () => {
     lambda = new Lambda({
       mode: 'Ephemeral',
-      lambdaPath: __dirname + '/handler/timeout.js',
+      lambdaPath: path.join(dirname, './handler/timeout.js'),
       lambdaTimeout: 2000
     });
 
@@ -111,7 +116,7 @@ describe('runl', () => {
   });
 
   it('auto reloads the lambda handler', async () => {
-    const lambdaPath = __dirname + '/handler/auto-reload.js';
+    const lambdaPath = path.join(dirname, './handler/auto-reload.js');
 
     lambda = new Lambda({
       mode: 'Persistent',
@@ -132,25 +137,14 @@ describe('runl', () => {
     expect(result3).toBe(1);
   });
 
-  it('accepts the index.js folder', async () => {
-    const lambdaPath = __dirname + '/handler';
-
+  it('loads a CommonJS handler', async () => {
     lambda = new Lambda({
-      mode: 'Persistent',
-      autoReload: true,
-      lambdaPath
+      mode: 'Ephemeral',
+      lambdaPath: path.join(dirname, './handler/commonjs.cjs')
     });
 
-    const result1 = await lambda.execute();
-    const result2 = await lambda.execute();
+    const result = await lambda.execute();
 
-    expect(result1).toBe(1);
-    expect(result2).toBe(2);
-
-    touchFile(path.join(lambdaPath, 'index.js'));
-
-    const result3 = await lambda.execute();
-
-    expect(result3).toBe(1);
+    expect(result).toBe('foo');
   });
 });

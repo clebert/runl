@@ -33,12 +33,16 @@ several megabytes in size.
 
 ### How to use `Ephemeral` mode
 
-```
-const { Lambda } = require('runl');
+```js
+import * as path from 'path';
+import * as url from 'url';
+import { Lambda } from 'runl';
+
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const lambda = new Lambda({
   mode: 'Ephemeral',
-  lambdaPath: __dirname + '/handler/example-handler.js',
+  lambdaPath: path.join(dirname, './handler/example-handler.js'),
   environment: {
     BASE_URL: '/'
   }
@@ -54,16 +58,19 @@ your dev server.
 
 ### How to use `Persistent` mode
 
-```
-import { APIGatewayProxyResult } from 'aws-lambda';
-import { Lambda, LambdaMode } from 'runl';
+```js
+import * as path from 'path';
+import * as url from 'url';
+import { Lambda } from 'runl';
+
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const lambda = new Lambda({
-  mode: LambdaMode.Persistent,
-  lambdaPath: __dirname + '/handler/example-handler.js'
+  mode: 'Persistent',
+  lambdaPath: path.join(dirname, './handler/example-handler.js')
 });
 
-const result = lambda.execute<APIGatewayProxyResult>();
+const result = lambda.execute();
 
 // you can manually stop the child process
 // otherwise the child process lives

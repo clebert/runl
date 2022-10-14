@@ -1,11 +1,27 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "rootDir": ".",
-    "composite": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "importsNotUsedAsValues": "error",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "target": "es2022",
+    "checkJs": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "types",
+    "rootDir": "src"
   },
-  "files": [
-    "package.json",
-  ]
+  "include": ["**/*"],
+  "exclude": ["dist", "node_modules", "types"]
 }

@@ -1,17 +1,11 @@
 /* eslint-disable no-console */
 
 import type { Callback } from 'aws-lambda';
-import { LambdaContext } from './utils/context';
-import { getLambdaHandler } from './utils/get-lambda-handler';
-import {
-  isOption,
-  isWithEvent,
-  isWithRequestNumber,
-  LambdaOptions,
-  WithEvent,
-  WithRequestNumber
-} from './types';
-import { serializeError } from './utils/error';
+import type { LambdaOptions, WithEvent, WithRequestNumber } from './types.js';
+import { isOption, isWithEvent, isWithRequestNumber } from './types.js';
+import { LambdaContext } from './utils/context.js';
+import { serializeError } from './utils/error.js';
+import { getLambdaHandler } from './utils/get-lambda-handler.js';
 
 type RawHandlerOptions = LambdaOptions & WithRequestNumber & WithEvent;
 
@@ -28,12 +22,12 @@ const getOptions = (rawOptions: string): RawHandlerOptions => {
   return options;
 };
 
-export const runLambda = async (): Promise<void> => {
+export const runLambda = (): void => {
   process.on('message', async (rawOptions: string) => {
     const options = getOptions(rawOptions);
 
     try {
-      const handler = getLambdaHandler(options);
+      const handler = await getLambdaHandler(options);
       const context = new LambdaContext(options);
 
       const callback: Callback = (error, result): void => {
@@ -62,14 +56,15 @@ export const runLambda = async (): Promise<void> => {
         return;
       }
 
-      const result = await resultPromise;
       process.send({
-        result,
+        result: await resultPromise,
         requestNumber: options.requestNumber
       });
-    } catch (error) {
-      process.send({
-        error: serializeError(error),
+    } catch (error: unknown) {
+      process.send?.({
+        error: serializeError(
+          error instanceof Error ? error : new Error(String(error))
+        ),
         requestNumber: options.requestNumber
       });
     }

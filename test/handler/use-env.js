@@ -1,4 +1,5 @@
-exports.handler = async () =>
-  new Promise((resolve) => {
-    resolve(process.env.TEST);
-  });
+// @ts-check
+
+export async function handler() {
+  return process.env.TEST;
+}
